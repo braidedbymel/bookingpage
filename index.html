@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book with Mel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap">
+<style>
+/* ===== EASY CUSTOMIZING: change colours and fonts here ===== */
+:root{
+  --pink-50:#fff6f8; --pink-100:#fde8ee; --pink-200:#f9cfdb; --pink-300:#f4b6c6; --pink-400:#ec96ad;
+  --ink:#3a2a30; --muted:#8a7078;
+  --display:'DM Serif Display',Georgia,serif;
+  --body:'DM Sans',system-ui,-apple-system,'Segoe UI','Noto Sans','Noto Sans Arabic','Noto Sans Devanagari','Noto Sans Bengali','PingFang SC','Microsoft YaHei',sans-serif;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--pink-50);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding:24px 16px 64px;min-height:100vh;position:relative;overflow-x:hidden}
+
+.blobs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;background:var(--pink-200);animation:drift 18s ease-in-out infinite alternate}
+.blob:nth-child(1){width:340px;height:340px;top:-80px;left:-100px}
+.blob:nth-child(2){width:300px;height:300px;bottom:-60px;right:-80px;background:var(--pink-300);opacity:.4;animation-duration:23s;animation-delay:-6s}
+.blob:nth-child(3){width:220px;height:220px;top:45%;left:60%;background:var(--pink-100);animation-duration:27s;animation-delay:-12s}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(50px,40px) scale(1.15)}}
+
+main{position:relative;z-index:1;max-width:520px;margin:0 auto;display:grid;gap:22px}
+
+.langbar{display:flex;justify-content:flex-end}
+.langbar select{width:auto;padding:8px 12px;border-radius:99px;font-size:.9rem;background:rgba(255,255,255,.9)}
+
+.brand{text-align:center}
+.brand .name{font-family:var(--display);font-size:clamp(2.2rem,9vw,3.2rem);line-height:1;margin:0;letter-spacing:.01em}
+.brand .sub{font-size:.85rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
+.card{background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid var(--pink-200);border-radius:20px;
+  padding:22px;box-shadow:0 10px 40px rgba(236,150,173,.18)}
+h2{font-family:var(--display);font-weight:400;font-size:1.5rem;margin:0}
+
+/* Calendar */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-head h2{text-align:center}
+.nav{width:40px;height:40px;padding:0;border-radius:50%;background:var(--pink-100);border:1px solid var(--pink-200);box-shadow:none;font-size:1.1rem}
+.nav:disabled{opacity:.35}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dow{font-size:.72rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:center;padding-bottom:4px}
+.day{aspect-ratio:1;display:grid;place-items:center;border-radius:12px;font-size:.95rem;font-weight:500;border:1.5px solid transparent;
+  background:transparent;padding:0;color:var(--muted);box-shadow:none;opacity:.5;cursor:default}
+.day.empty{visibility:hidden}
+.day.open{background:var(--pink-100);border-color:var(--pink-200);color:var(--ink);opacity:1;cursor:pointer;transition:transform .15s,background .2s}
+.day.open:hover{background:var(--pink-300);transform:scale(1.08)}
+.day.sel{background:var(--pink-400);border-color:var(--pink-400);color:#fff;opacity:1;transform:scale(1.08)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:.8rem;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:14px;height:14px;border-radius:5px;display:inline-block;background:var(--pink-100);border:1.5px solid var(--pink-200)}
+.legend i.x{background:transparent;opacity:.6}
+
+/* Form */
+#formCard{display:none}
+.picked #formCard{display:block;animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+form{display:grid;gap:15px}
+.chosen{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--pink-100);border:1px solid var(--pink-200);border-radius:12px;padding:12px 14px}
+.chosen small{color:var(--muted);font-size:.8rem}
+.chosen strong{font-family:var(--display);font-weight:400;font-size:1.25rem;display:block}
+.link{background:none;border:0;box-shadow:none;padding:4px 6px;color:var(--ink);text-decoration:underline;font-weight:500;font-size:.9rem}
+.link:hover{background:none;transform:none}
+label{display:grid;gap:6px;font-weight:500;font-size:.9rem}
+label small{font-weight:400;color:var(--muted)}
+input,select,textarea{font:inherit;color:var(--ink);background:#fff;border:1.5px solid var(--pink-200);border-radius:12px;
+  padding:12px 13px;width:100%;min-width:0;transition:border-color .2s,box-shadow .2s}
+textarea{min-height:84px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pink-400);box-shadow:0 0 0 4px var(--pink-100)}
+button{font:inherit;font-weight:600;color:var(--ink);background:var(--pink-300);border:0;border-radius:14px;padding:15px 20px;
+  cursor:pointer;transition:transform .15s,background .2s,box-shadow .2s;box-shadow:0 6px 18px rgba(244,182,198,.6)}
+button:hover{background:var(--pink-400);transform:translateY(-2px)}
+button:focus-visible,.day:focus-visible,select:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+button:disabled{opacity:.6;cursor:default;transform:none}
+.note{font-size:.85rem;color:var(--muted);margin:0}
+.err{background:#fff0e6;border:1px solid #f5cfb0;border-radius:12px;padding:12px 14px;font-size:.95rem}
+
+.rise{opacity:0;transform:translateY(16px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0) * 80ms)}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* Success */
+.thanks{display:none;text-align:center;gap:12px;justify-items:center;padding:36px 20px}
+.sent #calCard,.sent #formCard{display:none}
+.sent .thanks{display:grid;animation:rise .6s both}
+.check{width:84px;height:84px}
+.check circle{fill:var(--pink-100);stroke:var(--pink-300);stroke-width:3;stroke-dasharray:252;stroke-dashoffset:252;animation:draw .7s .1s forwards}
+.check path{fill:none;stroke:var(--ink);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:50;stroke-dashoffset:50;animation:draw .5s .7s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.thanks p{color:var(--muted);margin:0}
+.thanks button{margin-top:8px;background:var(--pink-100);box-shadow:none;border:1px solid var(--pink-200)}
+
+@media (prefers-reduced-motion:reduce){
+  .blob,.rise,.check circle,.check path,.picked #formCard,.sent .thanks{animation:none!important}
+  .rise{opacity:1;transform:none}
+  .check circle,.check path{stroke-dashoffset:0}
+  .day.open:hover,.day.sel{transform:none}
+}
+</style>
+<script src="settings.js"></script>
+</head>
+<body>
+<div class="blobs" aria-hidden="true"><div class="blob"></div><div class="blob"></div><div class="blob"></div></div>
+
+<main id="page">
+  <div class="langbar rise" style="--i:0">
+    <select id="lang" aria-label="Language">
+      <option value="en">English</option>
+      <option value="de">Deutsch</option>
+      <option value="zh">中文</option>
+      <option value="hi">हिन्दी</option>
+      <option value="es">Español</option>
+      <option value="fr">Français</option>
+      <option value="ar">العربية</option>
+      <option value="bn">বাংলা</option>
+      <option value="pt">Português</option>
+      <option value="ru">Русский</option>
+      <option value="ur">اردو</option>
+    </select>
+  </div>
+
+  <header class="brand rise" style="--i:1">
+    <h1 class="name">braidedbymel</h1>
+    <p class="sub" data-i="sub"></p>
+  </header>
+
+  <section class="card rise" style="--i:2" id="calCard">
+    <div class="cal-head">
+      <button class="nav" id="prev" type="button"></button>
+      <h2 id="monthLabel"></h2>
+      <button class="nav" id="next" type="button"></button>
+    </div>
+    <div class="grid" id="dows"></div>
+    <div class="grid" id="days"></div>
+    <div class="legend">
+      <span><i></i><b style="font-weight:400" data-i="avail"></b></span>
+      <span><i class="x"></i><b style="font-weight:400" data-i="unavail"></b></span>
+    </div>
+  </section>
+
+  <section class="card" id="formCard">
+    <form id="form" novalidate>
+      <div class="chosen">
+        <div><small data-i="yourDate"></small><strong id="chosenText"></strong></div>
+        <button class="link" type="button" id="change" data-i="change"></button>
+      </div>
+      <label for="name"><span data-i="name"></span><input id="name" name="name" autocomplete="name" required></label>
+      <label for="address"><span data-i="address"></span><input id="address" name="address" autocomplete="street-address" data-ph="addressPh" required></label>
+      <label for="phone"><span data-i="phone"></span><input id="phone" name="phone" type="tel" autocomplete="tel" required></label>
+      <label for="style"><span data-i="style"></span><input id="style" name="hairstyle" data-ph="stylePh" required></label>
+      <label for="email"><span><span data-i="email"></span> <small data-i="emailOpt"></small></span><input id="email" name="email" type="email" autocomplete="email"></label>
+      <label for="notes"><span data-i="notes"></span><textarea id="notes" name="notes"></textarea></label>
+      <button id="send" type="submit" data-i="send"></button>
+      <p class="note" data-i="note"></p>
+      <div id="error" class="err" role="alert" hidden></div>
+    </form>
+  </section>
+
+  <section class="card thanks" id="thanks" role="status">
+    <svg class="check" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="40"/><path d="M26 43l11 11 21-23"/></svg>
+    <h2 data-i="thanksTitle"></h2>
+    <p id="thanksText"></p>
+    <button type="button" id="again" data-i="again"></button>
+  </section>
+</main>
+
+<script>
+/* ---------- Translations (10 most spoken languages) ---------- */
+var T = {
+en:{sub:"Book with Mel",avail:"Available",unavail:"Not available",prev:"Previous month",next:"Next month",yourDate:"Your date",change:"Change date",name:"Name",address:"Address",addressPh:"Street, number, city",phone:"Phone number",style:"Hairstyle",stylePh:"e.g. knotless braids, medium, waist length",email:"Email for confirmation",emailOpt:"(optional)",notes:"Anything I should know?",send:"Request this date",note:"Mel will confirm your appointment and the price personally. No payment is taken online.",errDate:"Please choose a date first.",errFields:"Please fill in your name, address, phone number and hairstyle.",errSend:"Your request could not be sent. Please try again or contact Mel directly.",thanksTitle:"Request sent",thanksText:"Thank you! Mel will contact you shortly to confirm your appointment.",demo:"Preview mode: this request was not sent. Connect your form to start receiving bookings.",again:"Back to calendar"},
+de:{sub:"Buche bei Mel",avail:"Verfügbar",unavail:"Nicht verfügbar",prev:"Voriger Monat",next:"Nächster Monat",yourDate:"Dein Datum",change:"Datum ändern",name:"Name",address:"Adresse",addressPh:"Straße, Hausnummer, Stadt",phone:"Telefonnummer",style:"Frisur",stylePh:"z. B. Knotless Braids, mittellang, bis zur Taille",email:"E-Mail für die Bestätigung",emailOpt:"(optional)",notes:"Gibt es etwas, das ich wissen sollte?",send:"Dieses Datum anfragen",note:"Mel bestätigt deinen Termin und den Preis persönlich. Es wird keine Online-Zahlung verlangt.",errDate:"Bitte wähle zuerst ein Datum.",errFields:"Bitte gib deinen Namen, deine Adresse, Telefonnummer und Frisur an.",errSend:"Deine Anfrage konnte nicht gesendet werden. Bitte versuche es erneut oder kontaktiere Mel direkt.",thanksTitle:"Anfrage gesendet",thanksText:"Danke! Mel meldet sich bald bei dir, um deinen Termin zu bestätigen.",demo:"Vorschaumodus: Diese Anfrage wurde nicht gesendet. Verbinde dein Formular, um Buchungen zu erhalten.",again:"Zurück zum Kalender"},
+zh:{sub:"预约 Mel",avail:"可预约",unavail:"不可预约",prev:"上个月",next:"下个月",yourDate:"您选择的日期",change:"更改日期",name:"姓名",address:"地址",addressPh:"街道、门牌号、城市",phone:"电话号码",style:"发型",stylePh:"例如：无结辫、中长、及腰",email:"确认邮箱",emailOpt:"（选填）",notes:"有什么需要我知道的吗？",send:"申请此日期",note:"Mel 会亲自与您确认预约和价格。无需在线付款。",errDate:"请先选择日期。",errFields:"请填写姓名、地址、电话号码和发型。",errSend:"无法发送您的申请。请重试或直接联系 Mel。",thanksTitle:"申请已发送",thanksText:"谢谢！Mel 会尽快联系您确认预约。",demo:"预览模式：此申请未发送。请先连接表单以接收预约。",again:"返回日历"},
+hi:{sub:"Mel के साथ बुक करें",avail:"उपलब्ध",unavail:"उपलब्ध नहीं",prev:"पिछला महीना",next:"अगला महीना",yourDate:"आपकी तारीख",change:"तारीख बदलें",name:"नाम",address:"पता",addressPh:"सड़क, नंबर, शहर",phone:"फ़ोन नंबर",style:"हेयरस्टाइल",stylePh:"जैसे नॉटलेस ब्रेड्स, मध्यम, कमर तक",email:"पुष्टि के लिए ईमेल",emailOpt:"(वैकल्पिक)",notes:"क्या मुझे कुछ और जानना चाहिए?",send:"यह तारीख माँगें",note:"Mel स्वयं आपकी अपॉइंटमेंट और कीमत की पुष्टि करेंगी। ऑनलाइन कोई भुगतान नहीं लिया जाता।",errDate:"कृपया पहले तारीख चुनें।",errFields:"कृपया अपना नाम, पता, फ़ोन नंबर और हेयरस्टाइल भरें।",errSend:"आपका अनुरोध भेजा नहीं जा सका। कृपया फिर कोशिश करें या सीधे Mel से संपर्क करें।",thanksTitle:"अनुरोध भेज दिया गया",thanksText:"धन्यवाद! Mel आपकी अपॉइंटमेंट की पुष्टि के लिए जल्द ही संपर्क करेंगी।",demo:"प्रीव्यू मोड: यह अनुरोध भेजा नहीं गया। बुकिंग पाने के लिए अपना फ़ॉर्म जोड़ें।",again:"कैलेंडर पर वापस जाएँ"},
+es:{sub:"Reserva con Mel",avail:"Disponible",unavail:"No disponible",prev:"Mes anterior",next:"Mes siguiente",yourDate:"Tu fecha",change:"Cambiar fecha",name:"Nombre",address:"Dirección",addressPh:"Calle, número, ciudad",phone:"Número de teléfono",style:"Peinado",stylePh:"p. ej. trenzas sin nudos, medianas, hasta la cintura",email:"Correo para la confirmación",emailOpt:"(opcional)",notes:"¿Algo que deba saber?",send:"Solicitar esta fecha",note:"Mel confirmará tu cita y el precio personalmente. No se cobra nada en línea.",errDate:"Elige primero una fecha.",errFields:"Rellena tu nombre, dirección, teléfono y peinado.",errSend:"No se pudo enviar tu solicitud. Inténtalo de nuevo o contacta con Mel directamente.",thanksTitle:"Solicitud enviada",thanksText:"¡Gracias! Mel te contactará pronto para confirmar tu cita.",demo:"Modo de vista previa: esta solicitud no se envió. Conecta tu formulario para recibir reservas.",again:"Volver al calendario"},
+fr:{sub:"Réservez avec Mel",avail:"Disponible",unavail:"Indisponible",prev:"Mois précédent",next:"Mois suivant",yourDate:"Votre date",change:"Changer de date",name:"Nom",address:"Adresse",addressPh:"Rue, numéro, ville",phone:"Numéro de téléphone",style:"Coiffure",stylePh:"ex. knotless braids, mi-longues, jusqu'à la taille",email:"E-mail de confirmation",emailOpt:"(facultatif)",notes:"Quelque chose à me signaler ?",send:"Demander cette date",note:"Mel confirmera personnellement votre rendez-vous et le prix. Aucun paiement en ligne.",errDate:"Veuillez d'abord choisir une date.",errFields:"Veuillez renseigner votre nom, adresse, téléphone et coiffure.",errSend:"Votre demande n'a pas pu être envoyée. Réessayez ou contactez Mel directement.",thanksTitle:"Demande envoyée",thanksText:"Merci ! Mel vous contactera bientôt pour confirmer votre rendez-vous.",demo:"Mode aperçu : cette demande n'a pas été envoyée. Connectez votre formulaire pour recevoir des réservations.",again:"Retour au calendrier"},
+ar:{sub:"احجز موعدك مع Mel",avail:"متاح",unavail:"غير متاح",prev:"الشهر السابق",next:"الشهر التالي",yourDate:"تاريخك",change:"تغيير التاريخ",name:"الاسم",address:"العنوان",addressPh:"الشارع، الرقم، المدينة",phone:"رقم الهاتف",style:"تسريحة الشعر",stylePh:"مثال: ضفائر بدون عقد، متوسطة، حتى الخصر",email:"البريد الإلكتروني للتأكيد",emailOpt:"(اختياري)",notes:"هل هناك شيء يجب أن أعرفه؟",send:"اطلب هذا التاريخ",note:"ستؤكد Mel موعدك والسعر بنفسها. لا يتم أي دفع عبر الإنترنت.",errDate:"يرجى اختيار تاريخ أولاً.",errFields:"يرجى إدخال الاسم والعنوان ورقم الهاتف وتسريحة الشعر.",errSend:"تعذر إرسال طلبك. حاول مرة أخرى أو تواصل مع Mel مباشرة.",thanksTitle:"تم إرسال الطلب",thanksText:"شكراً لك! ستتواصل معك Mel قريباً لتأكيد موعدك.",demo:"وضع المعاينة: لم يتم إرسال هذا الطلب. اربط النموذج لبدء استلام الحجوزات.",again:"العودة إلى التقويم"},
+bn:{sub:"Mel-এর সাথে বুক করুন",avail:"উপলব্ধ",unavail:"উপলব্ধ নয়",prev:"আগের মাস",next:"পরের মাস",yourDate:"আপনার তারিখ",change:"তারিখ বদলান",name:"নাম",address:"ঠিকানা",addressPh:"রাস্তা, নম্বর, শহর",phone:"ফোন নম্বর",style:"হেয়ারস্টাইল",stylePh:"যেমন নটলেস ব্রেইড, মাঝারি, কোমর পর্যন্ত",email:"নিশ্চিতকরণের জন্য ইমেইল",emailOpt:"(ঐচ্ছিক)",notes:"আমার কি আর কিছু জানা দরকার?",send:"এই তারিখের অনুরোধ করুন",note:"Mel নিজে আপনার অ্যাপয়েন্টমেন্ট ও দাম নিশ্চিত করবেন। অনলাইনে কোনো পেমেন্ট নেওয়া হয় না।",errDate:"অনুগ্রহ করে আগে একটি তারিখ বেছে নিন।",errFields:"অনুগ্রহ করে নাম, ঠিকানা, ফোন নম্বর ও হেয়ারস্টাইল লিখুন।",errSend:"আপনার অনুরোধ পাঠানো যায়নি। আবার চেষ্টা করুন বা সরাসরি Mel-এর সাথে যোগাযোগ করুন।",thanksTitle:"অনুরোধ পাঠানো হয়েছে",thanksText:"ধন্যবাদ! আপনার অ্যাপয়েন্টমেন্ট নিশ্চিত করতে Mel শীঘ্রই যোগাযোগ করবেন।",demo:"প্রিভিউ মোড: এই অনুরোধ পাঠানো হয়নি। বুকিং পেতে আপনার ফর্ম যুক্ত করুন।",again:"ক্যালেন্ডারে ফিরে যান"},
+pt:{sub:"Agende com a Mel",avail:"Disponível",unavail:"Indisponível",prev:"Mês anterior",next:"Próximo mês",yourDate:"Sua data",change:"Alterar data",name:"Nome",address:"Endereço",addressPh:"Rua, número, cidade",phone:"Telefone",style:"Penteado",stylePh:"ex.: tranças sem nó, médias, até a cintura",email:"E-mail para confirmação",emailOpt:"(opcional)",notes:"Algo que eu deva saber?",send:"Solicitar esta data",note:"A Mel confirmará seu horário e o preço pessoalmente. Nenhum pagamento é feito online.",errDate:"Escolha primeiro uma data.",errFields:"Preencha seu nome, endereço, telefone e penteado.",errSend:"Não foi possível enviar seu pedido. Tente novamente ou fale diretamente com a Mel.",thanksTitle:"Pedido enviado",thanksText:"Obrigada! A Mel entrará em contato em breve para confirmar seu horário.",demo:"Modo de pré-visualização: este pedido não foi enviado. Conecte seu formulário para receber reservas.",again:"Voltar ao calendário"},
+ru:{sub:"Запись к Mel",avail:"Свободно",unavail:"Недоступно",prev:"Предыдущий месяц",next:"Следующий месяц",yourDate:"Ваша дата",change:"Изменить дату",name:"Имя",address:"Адрес",addressPh:"Улица, дом, город",phone:"Номер телефона",style:"Причёска",stylePh:"например, брейды без узлов, средней длины, до пояса",email:"Эл. почта для подтверждения",emailOpt:"(необязательно)",notes:"Что мне нужно знать?",send:"Запросить эту дату",note:"Mel лично подтвердит запись и стоимость. Онлайн-оплата не требуется.",errDate:"Сначала выберите дату.",errFields:"Укажите имя, адрес, телефон и причёску.",errSend:"Не удалось отправить заявку. Попробуйте ещё раз или свяжитесь с Mel напрямую.",thanksTitle:"Заявка отправлена",thanksText:"Спасибо! Mel скоро свяжется с вами, чтобы подтвердить запись.",demo:"Режим предпросмотра: заявка не отправлена. Подключите форму, чтобы получать записи.",again:"Назад к календарю"},
+ur:{sub:"Mel کے ساتھ بک کریں",avail:"دستیاب",unavail:"دستیاب نہیں",prev:"پچھلا مہینہ",next:"اگلا مہینہ",yourDate:"آپ کی تاریخ",change:"تاریخ تبدیل کریں",name:"نام",address:"پتہ",addressPh:"گلی، نمبر، شہر",phone:"فون نمبر",style:"ہیئر اسٹائل",stylePh:"مثلاً نوٹ لیس بریڈز، درمیانی، کمر تک",email:"تصدیق کے لیے ای میل",emailOpt:"(اختیاری)",notes:"کیا مجھے کچھ اور جاننے کی ضرورت ہے؟",send:"یہ تاریخ طلب کریں",note:"Mel خود آپ کی اپائنٹمنٹ اور قیمت کی تصدیق کریں گی۔ آن لائن کوئی ادائیگی نہیں لی جاتی۔",errDate:"براہ کرم پہلے تاریخ منتخب کریں۔",errFields:"براہ کرم اپنا نام، پتہ، فون نمبر اور ہیئر اسٹائل درج کریں۔",errSend:"آپ کی درخواست نہیں بھیجی جا سکی۔ دوبارہ کوشش کریں یا براہِ راست Mel سے رابطہ کریں۔",thanksTitle:"درخواست بھیج دی گئی",thanksText:"شکریہ! Mel آپ کی اپائنٹمنٹ کی تصدیق کے لیے جلد رابطہ کریں گی۔",demo:"پیش منظر موڈ: یہ درخواست نہیں بھیجی گئی۔ بکنگ وصول کرنے کے لیے اپنا فارم جوڑیں۔",again:"کیلنڈر پر واپس جائیں"}
+};
+var RTL = {ar:1, ur:1};
+
+(function(){
+  var $ = function(id){return document.getElementById(id)};
+  var page = $('page');
+  /* Fallback settings, used only if settings.js is missing. Keep settings.js next to this file to override. */
+  var S = window.SETTINGS || {
+    formEndpoint: "https://formspree.io/f/YOUR_FORM_ID",
+    openWeekdays: [3, 4, 5, 6],
+    monthsAhead: 3,
+    unavailable: ["2026-10-24", "2026-10-31", "2026-11-07"]
+  };
+
+  var lang = 'en';
+  try{ var saved = localStorage.getItem('lang'); if(saved && T[saved]) lang = saved; else {
+    var nav = (navigator.language||'en').slice(0,2).toLowerCase(); if(T[nav]) lang = nav; } }catch(e){}
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var first = new Date(today.getFullYear(), today.getMonth(), 1);
+  var view = new Date(first);
+  var selected = null;
+
+  function loc(){ return lang + '-u-nu-latn'; }
+  function iso(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  function parse(s){ var p = s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function nice(s, l){ return parse(s).toLocaleDateString(l || loc(), {weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+  function t(k){ return T[lang][k]; }
+
+  function applyText(){
+    document.documentElement.lang = lang;
+    document.documentElement.dir = RTL[lang] ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i]').forEach(function(e){ e.textContent = t(e.getAttribute('data-i')); });
+    document.querySelectorAll('[data-ph]').forEach(function(e){ e.placeholder = t(e.getAttribute('data-ph')); });
+    $('prev').textContent = RTL[lang] ? '→' : '←';
+    $('next').textContent = RTL[lang] ? '←' : '→';
+    $('prev').setAttribute('aria-label', t('prev'));
+    $('next').setAttribute('aria-label', t('next'));
+    $('lang').value = lang;
+    if(!$('thanksText').getAttribute('data-demo')) $('thanksText').textContent = t('thanksText');
+    else $('thanksText').textContent = t('demo');
+    if(selected) $('chosenText').textContent = nice(selected);
+    var d = $('dows'); d.textContent = '';
+    for(var i=0;i<7;i++){ var e = document.createElement('div'); e.className='dow';
+      e.textContent = new Date(2024,0,1+i).toLocaleDateString(loc(),{weekday:'short'}); d.append(e); }
+    render();
+  }
+
+  function render(){
+    $('monthLabel').textContent = view.toLocaleDateString(loc(), {month:'long', year:'numeric'});
+    var m = (view.getFullYear()-first.getFullYear())*12 + view.getMonth()-first.getMonth();
+    $('prev').disabled = m <= 0;
+    $('next').disabled = m >= S.monthsAhead - 1;
+    var grid = $('days'); grid.textContent = '';
+    var lead = (new Date(view.getFullYear(), view.getMonth(), 1).getDay() + 6) % 7;
+    for(var i=0;i<lead;i++){ var e = document.createElement('div'); e.className='day empty'; grid.append(e); }
+    var count = new Date(view.getFullYear(), view.getMonth()+1, 0).getDate();
+    for(var n=1;n<=count;n++){
+      var d = new Date(view.getFullYear(), view.getMonth(), n), key = iso(d);
+      var open = d > today && S.openWeekdays.indexOf(d.getDay()) !== -1 && S.unavailable.indexOf(key) === -1;
+      var b = document.createElement('button');
+      b.type='button'; b.textContent = n;
+      b.className = 'day' + (open ? ' open' : '') + (key === selected ? ' sel' : '');
+      if(open){ b.setAttribute('aria-label', nice(key) + ', ' + t('avail')); (function(k){ b.onclick = function(){ pick(k); }; })(key); }
+      else { b.disabled = true; b.setAttribute('aria-label', nice(key) + ', ' + t('unavail')); }
+      grid.append(b);
+    }
+  }
+
+  function pick(key){
+    selected = key; $('chosenText').textContent = nice(key);
+    page.classList.add('picked'); render();
+    setTimeout(function(){ $('formCard').scrollIntoView({behavior:'smooth',block:'start'}); }, 60);
+  }
+
+  $('lang').onchange = function(){ lang = this.value; try{ localStorage.setItem('lang', lang); }catch(e){} applyText(); };
+  $('prev').onclick = function(){ view.setMonth(view.getMonth()-1); render(); };
+  $('next').onclick = function(){ view.setMonth(view.getMonth()+1); render(); };
+  $('change').onclick = function(){ page.classList.remove('picked'); selected = null; render(); window.scrollTo({top:0,behavior:'smooth'}); };
+  $('again').onclick = function(){ page.classList.remove('sent','picked'); selected = null; $('thanksText').removeAttribute('data-demo'); applyText(); };
+
+  var err = $('error');
+  function showError(k){ err.hidden=false; err.textContent=t(k); }
+
+  $('form').addEventListener('submit', function(e){
+    e.preventDefault(); err.hidden = true;
+    if(!selected){ showError('errDate'); return; }
+    var req = ['name','address','phone','style'];
+    for(var i=0;i<req.length;i++){ if(!$(req[i]).value.trim()){ showError('errFields'); return; } }
+    var demo = !S.formEndpoint || S.formEndpoint.indexOf('YOUR_FORM_ID') !== -1;
+    var btn = $('send'); btn.disabled = true;
+    var done = function(){
+      btn.disabled = false; $('form').reset();
+      if(demo){ $('thanksText').setAttribute('data-demo','1'); $('thanksText').textContent = t('demo'); }
+      else { $('thanksText').removeAttribute('data-demo'); $('thanksText').textContent = t('thanksText'); }
+      page.classList.add('sent');
+    };
+    if(demo){ setTimeout(done, 400); return; }
+    var data = new FormData($('form'));
+    data.append('date', selected);
+    data.append('date_text', nice(selected, 'en-GB'));
+    data.append('customer_language', $('lang').options[$('lang').selectedIndex].text);
+    data.append('_subject', 'New booking request for ' + nice(selected,'en-GB') + ' from ' + $('name').value.trim());
+    fetch(S.formEndpoint, {method:'POST', body:data, headers:{'Accept':'application/json'}})
+      .then(function(r){ if(!r.ok) throw new Error(); done(); })
+      .catch(function(){ btn.disabled = false; showError('errSend'); });
+  });
+
+  applyText();
+})();
+</script>
+</body>
+</html>
